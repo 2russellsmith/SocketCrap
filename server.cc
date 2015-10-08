@@ -135,10 +135,14 @@ Server::handle(int client) {
             for(int i = 0; i < messages[name].size(); i++){
                 response += static_cast<ostringstream*>( &(ostringstream() << (i + 1)) )->str() + " " + messages[name].at(i).first + '\n';
             }
-        }else if(v.at(0) == "get" ){
+        }else if(v.at(0) == "get" && v.size() == 3){
             string name = v.at(1) + '\n';
             int index = atoi(v.at(2).c_str()) - 1;
-            response = "message " + messages[name].at(index).first + " " + messages[name].at(index).second;
+            if(index < messages[name].size()){
+                response = "message " + messages[name].at(index).first + " " + messages[name].at(index).second;
+            }else{
+                response = "error Bad Request\n";
+            }
         }else if(request == "reset\n"){
             messages.clear();
             response = "OK\n";
