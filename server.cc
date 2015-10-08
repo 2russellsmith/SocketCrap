@@ -84,7 +84,7 @@ Server::handle(int client) {
         // get a request
         string request = get_request(client);
         string response;
-        cout << request;
+        cout << request << endl;
         istringstream ss(request);
         string token;
         vector<string> v;
@@ -109,37 +109,42 @@ Server::handle(int client) {
             while(getline(ss2, token2, ' ')) {
                 v2.push_back(token2);
             }
-            if(v2.size() == 3){
-                string name = v2.at(1);
+            if(v2.size() == 4){
+                string name = v2.at(1) + '\n';
                 string subject = v2.at(2);
                 string length = v2.at(3);
                 string message;
                 for(int i = 1; i < v1.size(); i++){
-                    message += v1.at(i);
+                    message += v1.at(i) + '\n';
                 }
-                if(messages.find(name)){
-                    messages.insert(std::make_pair(std::make_pair(1,2), myObject));
-                }else{
-                    messages[name] = new vector<pair<string, string> >();
-                }
-                messages[name] = 
+                messages[name].push_back(std::pair<string, string> (subject, length + "\n" + message));
+                cout << name << ": " << messages[name].size() << endl;
+                response = "OK\n";
             }else{
                 response = "error Bad Request\n";
+            } 
+
+        }else if(v.at(0) == "list" && v.size() == 2){
+            string name = v.at(1);
+            if(messages.find(name) == messages.end()){
+                response = "list 0\n"; 
+            }else{
+                response = "list " + static_cast<ostringstream*>( &(ostringstream() << (messages[name].size())) )->str() + '\n';
             }
-            response = "Putting\n";
-
-        }else if(v.at(0) == "list"){
-
-            response = "Listing\n";
-        }else if(v.at(0) == "get"){
-
-            response = "Getting\n";
+            for(int i = 0; i < messages[name].size(); i++){
+                response += static_cast<ostringstream*>( &(ostringstream() << (i + 1)) )->str() + " " + messages[name].at(i).first + '\n';
+            }
+        }else if(v.at(0) == "get" ){
+            string name = v.at(1) + '\n';
+            int index = atoi(v.at(2).c_str()) - 1;
+            response = "message " + messages[name].at(index).first + " " + messages[name].at(index).second;
         }else if(request == "reset\n"){
+            messages.clear();
             response = "OK\n";
         }else{
-            response = request;
+            response = "error Bad Request\n";
         }
-        cout << response;
+        cout << "Response: " << response << endl;
         bool success = send_response(client,response);
         // break if an error occurred
         if (not success)
