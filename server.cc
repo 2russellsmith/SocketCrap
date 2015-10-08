@@ -79,12 +79,13 @@ Server::serve() {
 
 void
 Server::handle(int client) {
+    cout << "HANDLE" << endl;
     // loop to handle all requests
     while (1) {
         // get a request
         string request = get_request(client);
         string response;
-        cout << request << endl;
+        cout << "Request: " << request << endl;
         istringstream ss(request);
         string token;
         vector<string> v;
@@ -93,6 +94,7 @@ Server::handle(int client) {
         }
         // break if client is done or an error occurred
         if (request.empty()){
+            cout << "BREAK" << endl;
             break;
         }
         // send response
@@ -118,7 +120,6 @@ Server::handle(int client) {
                     message += v1.at(i) + '\n';
                 }
                 messages[name].push_back(std::pair<string, string> (subject, length + "\n" + message));
-                cout << name << ": " << messages[name].size() << endl;
                 response = "OK\n";
             }else{
                 response = "error Bad Request\n";
@@ -185,6 +186,7 @@ Server::send_response(int client, string response) {
     int nleft = response.length();
     int nwritten;
     // loop to be sure it is all sent
+    cout << "Sending" << endl;
     while (nleft) {
         if ((nwritten = send(client, ptr, nleft, 0)) < 0) {
             if (errno == EINTR) {
